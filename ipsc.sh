@@ -7,18 +7,19 @@ localIp=$(hostname -I | awk '{print $1}')
 netIp=$(echo $localIp | sed 's/\([0-9]*\.[0-9]*\.[0-9]*\)\.[0-9]*/\1.0\/24/')
 
 # Show found net
-echo "Detecting network: $red"
+echo "Detecting network: $netIp"
 
 # Execute nmap to scan the net
 echo "Scaning network $netIp for active IPs..."
-nmap -sn $red | grep "Nmap scan report for" | awk '{print $5}'
+echo ""
+nmap -sn $netIp | grep "Nmap scan report for" | awk '{print $5}'
 
 # Calculate broadcast ip using ipcalc
 broadcast=$(ipcalc -n -b $netIp | grep "Broadcast" | awk '{print $2}')
 
 # Show broadcast IP
+echo ""
 echo "Broadcast IP: $broadcast"
-echo "Scan end"
 
 # Line jump
 echo " "
@@ -28,7 +29,11 @@ while true; do
     read -p "Do you want to ping broadcast $broadcast? (y/n): " answer
     case $answer in
         [Yy]* ) 
+            echo ""
+            echo "Waiting for results..."
+            echo""
             pingOut=$(ping -b -c 4 -w 5 $broadcast)
+            echo "$pingOut"
             break
             ;;
         [Nn]* )
@@ -50,11 +55,11 @@ else
 fi
 
 # Create the /IPSC directory if it doesn't exist
-log_directory="$document_path/IPSC"
+log_directory="$document_path/.IPSC_Logs"
 mkdir -p "$log_directory"  # Create the directory if it doesn't exist
 
 # Log file path
-log_file="$document_path/IPSC/log$(date +%Y%m%d%H%M%S).txt"
+log_file="$document_path/.IPSC_Logs/log$(date +%Y%m%d%H%M%S).txt"
 
 while true; do
     echo ""
